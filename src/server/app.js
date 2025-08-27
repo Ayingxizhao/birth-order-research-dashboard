@@ -23,7 +23,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // Serve static files
-app.use(express.static(path.join(__dirname, '../../src/client')));
+app.use(express.static(path.join(__dirname, '../client')));
 
 // Routes
 app.use('/api/submissions', submissionRoutes);
