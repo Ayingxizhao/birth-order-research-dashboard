@@ -1,104 +1,9 @@
 const express = require('express');
-const cors = require('cors');
-const bodyParser = require('body-parser');
-const path = require('path');
-const mongoose = require('mongoose');
-
-const app = express();
-const PORT = process.env.PORT || 3000;
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/birth-order-research';
-
-// Middleware
-app.use(cors());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-
-// Serve static files
-app.use(express.static(path.join(__dirname)));
-
-// MongoDB Connection
-mongoose.connect(MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-});
-
-const db = mongoose.connection;
-db.on('error', console.error.bind(console, 'MongoDB connection error:'));
-db.once('open', () => {
-    console.log('Connected to MongoDB database');
-});
-
-// Define Submission Schema
-const submissionSchema = new mongoose.Schema({
-    region: {
-        type: String,
-        required: true,
-        enum: ['Canadian', 'Pacific Islander', 'Western European', 'British', 'Central American', 'South American', 'Caribbean', 'Eastern European', 'Northern European', 'East Asian', 'African', 'South Asian', 'Middle Eastern', 'Other']
-    },
-    familySize: {
-        type: Number,
-        required: true,
-        min: 1,
-        max: 20
-    },
-    firstbornGender: {
-        type: String,
-        required: true,
-        enum: ['male', 'female']
-    },
-    attitudeScore: {
-        type: Number,
-        required: true,
-        min: 0.1,
-        max: 0.7
-    },
-    firstbornEducation: {
-        type: Number,
-        required: true,
-        min: 1,
-        max: 20
-    },
-    laterbornEducation: {
-        type: Number,
-        required: true,
-        min: 1,
-        max: 20
-    },
-    ageRange: {
-        type: String,
-        required: true,
-        enum: ['18-25', '26-30', '31-35', '35+']
-    },
-    notes: {
-        type: String,
-        maxlength: 1000
-    },
-    contactEmail: {
-        type: String,
-        match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Please enter a valid email']
-    },
-    ipAddress: String,
-    userAgent: String,
-    timestamp: {
-        type: Date,
-        default: Date.now
-    }
-});
-
-// Add indexes for better query performance
-submissionSchema.index({ region: 1, timestamp: -1 });
-submissionSchema.index({ attitudeScore: 1 });
-submissionSchema.index({ timestamp: -1 });
-
-const Submission = mongoose.model('Submission', submissionSchema);
-
-// Routes
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
-});
+const router = express.Router();
+const Submission = require('../models/Submission');
 
 // API endpoint for data submission
-app.post('/api/submit-data', async (req, res) => {
+router.post('/submit-data', async (req, res) => {
     try {
         const data = req.body;
         
@@ -158,7 +63,7 @@ app.post('/api/submit-data', async (req, res) => {
 });
 
 // API endpoint to get all submissions with pagination
-app.get('/api/submissions', async (req, res) => {
+router.get('/', async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 50;
@@ -191,7 +96,7 @@ app.get('/api/submissions', async (req, res) => {
 });
 
 // API endpoint to get submission statistics
-app.get('/api/statistics', async (req, res) => {
+router.get('/statistics', async (req, res) => {
     try {
         const stats = await Submission.aggregate([
             {
@@ -257,7 +162,7 @@ app.get('/api/statistics', async (req, res) => {
 });
 
 // API endpoint to export data as CSV
-app.get('/api/export-csv', async (req, res) => {
+router.get('/export-csv', async (req, res) => {
     try {
         const submissions = await Submission.find()
             .sort({ timestamp: -1 })
@@ -294,7 +199,7 @@ app.get('/api/export-csv', async (req, res) => {
 });
 
 // API endpoint to get submissions by region
-app.get('/api/submissions/region/:region', async (req, res) => {
+router.get('/region/:region', async (req, res) => {
     try {
         const { region } = req.params;
         const submissions = await Submission.find({ region })
@@ -317,32 +222,4 @@ app.get('/api/submissions/region/:region', async (req, res) => {
     }
 });
 
-// Health check endpoint
-app.get('/api/health', async (req, res) => {
-    try {
-        await mongoose.connection.db.admin().ping();
-        res.json({
-            status: 'healthy',
-            database: 'connected',
-            timestamp: new Date().toISOString(),
-            uptime: process.uptime()
-        });
-    } catch (error) {
-        res.json({
-            status: 'unhealthy',
-            database: 'disconnected',
-            error: error.message,
-            timestamp: new Date().toISOString()
-        });
-    }
-});
-
-// Start server
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-    console.log(`Dashboard available at: http://localhost:${PORT}`);
-    console.log(`API available at: http://localhost:${PORT}/api`);
-    console.log(`MongoDB: ${MONGODB_URI}`);
-});
-
-module.exports = app;
+module.exports = router;

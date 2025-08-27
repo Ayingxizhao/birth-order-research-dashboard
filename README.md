@@ -1,76 +1,137 @@
-# Birth Order & Cultural Gender Attitudes Research Dashboard
+# Birth Order Research Dashboard
 
-The dashboard is hosted on GitHub Pages at:
-`https://Ayingxizhao.github.io/birth-order-research-dashboard/`
+Interactive research dashboard for birth order and cultural gender attitudes research.
 
-and you can access the paper here{https://ayingxizhao.github.io/assets/pdf/birth.pdf}
-## 🌐 Dashboard Access
+## 🏗️ Project Structure
 
-The research dashboard can be accessed in two ways:
+```
+src/
+├── client/                 # Frontend files
+│   ├── components/         # React/Vue components (if applicable)
+│   ├── data/              # Static data files
+│   ├── styles/            # CSS stylesheets
+│   ├── utils/             # Frontend utility functions
+│   └── index.html         # Main HTML file
+├── server/                 # Backend server
+│   └── app.js             # Main server application
+├── models/                 # Database models
+│   └── Submission.js      # Submission data model
+├── routes/                 # API route handlers
+│   ├── submissions.js     # Submission-related endpoints
+│   └── health.js          # Health check endpoint
+├── config/                 # Configuration files
+│   └── database.js        # Database connection setup
+└── middleware/             # Express middleware (if needed)
+```
 
-1. **Live Dashboard**: Visit [Birth Order Research Dashboard](https://Ayingxizhao.github.io/birth-order-research-dashboard/)
+## 🚀 Quick Start
 
-2. **Research Paper**: Read the full academic paper [here](https://ayingxizhao.github.io/assets/pdf/birth.pdf)
+### Prerequisites
+- Node.js (>= 14.0.0)
+- MongoDB (local or Atlas)
 
-## 🎯 Research Overview
+### Installation
 
-This dashboard presents findings from research examining how birth order effects on educational attainment vary by gender and cultural background. The study analyzes data from 706 immigrant families with 1,098 children aged 18-35.
+1. **Clone the repository**
+   ```bash
+   git clone <your-repo-url>
+   cd birth-order-research-dashboard
+   ```
 
-## 🔑 Key Findings
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-- **Male Firstborn Premium**: Consistent +1.46 years across all cultural backgrounds
-- **Female Firstborn Premium**: Varies from +1.75 years (progressive families) to +1.15 years (traditional families)
-- **Cultural Heterogeneity**: Female firstborn effects decline with more traditional gender attitudes
-- **Effect Size**: Large practical significance (0.64 standard deviations)
+3. **Set up environment variables**
+   ```bash
+   cp env.example .env
+   ```
+   
+   Edit `.env` file with your MongoDB connection string:
+   ```env
+   PORT=3000
+   MONGODB_URI=mongodb://localhost:27017/birth-order-research
+   ```
 
-## 📊 Dashboard Features
+4. **Start MongoDB** (if using local instance)
+   ```bash
+   # macOS with Homebrew
+   brew services start mongodb-community
+   
+   # Or start manually
+   mongod
+   ```
 
-### Interactive Visualizations
-- **Regional Gender Attitudes**: Color-coded by cultural attitude levels
-- **Family Size Analysis**: Tests for selection bias across firstborn genders
-- **Education Distribution**: Density plots by birth order and gender
-- **Effect Heterogeneity**: Interactive chart showing how effects vary with cultural attitudes
+5. **Run the application**
+   ```bash
+   # Development mode
+   npm run dev
+   
+   # Production mode
+   npm start
+   ```
 
-### Enhanced User Experience
-- Hover tooltips with detailed information
-- Interactive legends for all charts
-- Export functionality for charts
-- Responsive design for all devices
+6. **Access the application**
+   - Dashboard: http://localhost:3000
+   - API: http://localhost:3000/api
+   - Health check: http://localhost:3000/api/health
 
-### Data Contribution
-- Form for researchers to submit additional family data
-- Structured data collection for ongoing research
-- Real-time validation and feedback
+## 🗄️ MongoDB Setup
 
-## 📝 Contributing Data
+### Local MongoDB
+1. Install MongoDB Community Edition
+2. Start MongoDB service
+3. Create database: `birth-order-research`
 
-We welcome contributions from researchers and families to expand our dataset:
+### MongoDB Atlas (Cloud)
+1. Create account at [MongoDB Atlas](https://www.mongodb.com/atlas)
+2. Create a new cluster
+3. Get connection string
+4. Update `.env` file with Atlas URI
 
-1. Navigate to the "Contribute Data" tab
-2. Fill out the comprehensive form with your family's information
-3. Submit to help expand our understanding of birth order effects
+### Database Schema
+The application uses a `Submission` model with the following fields:
+- `region`: Cultural region (enum)
+- `familySize`: Number of family members
+- `firstbornGender`: Gender of firstborn
+- `attitudeScore`: Cultural attitude score
+- `firstbornEducation`: Education level of firstborn
+- `laterbornEducation`: Education level of laterborn
+- `ageRange`: Age range of participant
+- `notes`: Additional notes
+- `contactEmail`: Contact email
+- `timestamp`: Submission timestamp
 
-### Data Fields Collected
-- Region of origin
-- Family size
-- Firstborn gender
-- Cultural gender attitude score
-- Educational attainment (firstborn vs. later-born)
-- Age ranges
-- Additional contextual notes
+## 📡 API Endpoints
 
-## 🔒 Privacy & Ethics
+### Submissions
+- `POST /api/submissions/submit-data` - Submit new data
+- `GET /api/submissions` - Get all submissions (paginated)
+- `GET /api/submissions/statistics` - Get submission statistics
+- `GET /api/submissions/export-csv` - Export data as CSV
+- `GET /api/submissions/region/:region` - Get submissions by region
 
-- All submitted data is anonymized
-- No personally identifiable information is stored
-- Data is used solely for research purposes
-- Contact information is optional and only used for follow-up questions
+### Health
+- `GET /api/health` - Health check and database status
 
-## 📊 Data Sources
+## 🔧 Development
 
-The dashboard currently displays data from:
-- 706 immigrant families
-- 1,098 children (ages 18-35)
-- 13 different regions of origin
-- Cultural attitude scores ranging from 0.10 (progressive) to 0.69 (traditional)
+### Scripts
+- `npm start` - Start production server
+- `npm run dev` - Start development server with nodemon
+- `npm test` - Run tests (to be implemented)
+
+### Environment Variables
+- `PORT` - Server port (default: 3000)
+- `MONGODB_URI` - MongoDB connection string
+- `NODE_ENV` - Environment (development/production)
+
+## 🚀 Deployment
+
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed deployment instructions.
+
+## 📝 License
+
+MIT License - see LICENSE file for details.
 
