@@ -1,5 +1,8 @@
 # Birth Order & Cultural Gender Attitudes Research Dashboard
 
+The dashboard is automatically hosted on GitHub Pages at:
+`https://yourusername.github.io/birth-order-research-dashboard/`
+
 An interactive research dashboard exploring the relationship between birth order, cultural gender attitudes, and educational attainment in immigrant families.
 
 ## 🎯 Research Overview
@@ -31,30 +34,6 @@ This dashboard presents findings from research examining how birth order effects
 - Form for researchers to submit additional family data
 - Structured data collection for ongoing research
 - Real-time validation and feedback
-
-## 🚀 Getting Started
-
-### Local Development
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/birth-order-research-dashboard.git
-   cd birth-order-research-dashboard
-   ```
-
-2. Open `index.html` in your web browser
-
-3. No build process required - it's a pure HTML/CSS/JavaScript application
-
-### GitHub Pages Hosting
-The dashboard is automatically hosted on GitHub Pages at:
-`https://yourusername.github.io/birth-order-research-dashboard/`
-
-## 🛠️ Technology Stack
-
-- **Frontend**: HTML5, CSS3, JavaScript (ES6+)
-- **Charts**: D3.js v7 for interactive visualizations
-- **Styling**: Custom CSS with modern design principles
-- **Hosting**: GitHub Pages (static hosting)
 
 ## 📝 Contributing Data
 
@@ -88,48 +67,3 @@ The dashboard currently displays data from:
 - 13 different regions of origin
 - Cultural attitude scores ranging from 0.10 (progressive) to 0.69 (traditional)
 
-## 🔮 Future Enhancements
-
-- [ ] Real-time database integration
-- [ ] Advanced statistical analysis tools
-- [ ] Comparative studies across different countries
-- [ ] Machine learning insights
-- [ ] API endpoints for data access
-
-## 📚 Research Methodology
-
-This research uses:
-- **Instrumental Variables**: Firstborn gender as natural experiment
-- **Cultural Attitude Measures**: Standardized gender attitude scales
-- **Educational Metrics**: Years of formal education completed
-- **Statistical Controls**: Family size, region, age, and other covariates
-
-## 🤝 Collaboration
-
-We welcome:
-- **Researchers**: Submit additional datasets or analysis
-- **Families**: Contribute your family's educational data
-- **Developers**: Help improve the dashboard functionality
-- **Translators**: Help make the research accessible globally
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 📞 Contact
-
-For research questions or technical support:
-- **Research Team**: [Your Email]
-- **Technical Issues**: [GitHub Issues](https://github.com/yourusername/birth-order-research-dashboard/issues)
-- **Data Contributions**: Use the dashboard form or contact us directly
-
-## 🙏 Acknowledgments
-
-- Families who contributed their data
-- Research institutions supporting this work
-- Open-source community for D3.js and other tools
-- Academic collaborators and reviewers
-
----
-
-*This dashboard represents ongoing research. Please cite appropriately if using these findings in your own work.*
