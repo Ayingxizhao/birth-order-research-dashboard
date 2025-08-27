@@ -1,8 +1,6 @@
 # Birth Order & Cultural Gender Attitudes Research Dashboard
 
-## 🌐 Dashboard Access
-
-The research dashboard can be accessed in two ways:
+## 🌐 Artifacts
 
 1. **Live Dashboard**: Visit [Birth Order Research Dashboard](https://ayingxizhao.github.io/education-disparity-dashboard/)
 
