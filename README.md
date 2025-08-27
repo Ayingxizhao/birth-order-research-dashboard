@@ -1,9 +1,16 @@
 # Birth Order & Cultural Gender Attitudes Research Dashboard
 
-The dashboard is automatically hosted on GitHub Pages at:
-`https://yourusername.github.io/birth-order-research-dashboard/`
+The dashboard is hosted on GitHub Pages at:
+`https://Ayingxizhao.github.io/birth-order-research-dashboard/`
 
-An interactive research dashboard exploring the relationship between birth order, cultural gender attitudes, and educational attainment in immigrant families.
+and you can access the paper here{https://ayingxizhao.github.io/assets/pdf/birth.pdf}
+## 🌐 Dashboard Access
+
+The research dashboard can be accessed in two ways:
+
+1. **Live Dashboard**: Visit [Birth Order Research Dashboard](https://Ayingxizhao.github.io/birth-order-research-dashboard/)
+
+2. **Research Paper**: Read the full academic paper [here](https://ayingxizhao.github.io/assets/pdf/birth.pdf)
 
 ## 🎯 Research Overview
 
