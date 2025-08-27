@@ -1,5 +1,5 @@
 {
-  "name": "birth-order-research-dashboard",
+  "name": "your-new-project-name",
   "version": "1.0.0",
   "description": "Interactive research dashboard for birth order and cultural gender attitudes research",
   "main": "src/server/app.js",

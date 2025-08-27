@@ -4,7 +4,7 @@
 
 The research dashboard can be accessed in two ways:
 
-1. **Live Dashboard**: Visit [Birth Order Research Dashboard](https://Ayingxizhao.github.io/birth-order-research-dashboard/)
+1. **Live Dashboard**: Visit [Birth Order Research Dashboard](https://ayingxizhao.github.io/birth-order-research-dashboard/)
 
 2. **Research Paper**: Read the full academic paper [here](https://ayingxizhao.github.io/assets/pdf/birth.pdf)
 
