@@ -1,9 +1,5 @@
 # Birth Order & Cultural Gender Attitudes Research Dashboard
 
-The dashboard is hosted on GitHub Pages at:
-`https://Ayingxizhao.github.io/birth-order-research-dashboard/`
-
-and you can access the paper here{https://ayingxizhao.github.io/assets/pdf/birth.pdf}
 ## 🌐 Dashboard Access
 
 The research dashboard can be accessed in two ways:
