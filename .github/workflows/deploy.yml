@@ -22,12 +22,16 @@ jobs:
     - name: Install dependencies
       run: npm ci
       
-    - name: Build frontend (if needed)
+    - name: Build frontend
       run: |
-        # Copy frontend files to root for GitHub Pages
+        # Copy frontend files to dist folder
         mkdir -p dist
         cp -r src/client/* dist/
         cp -r assets dist/ 2>/dev/null || true
+        # Create .nojekyll file to disable Jekyll processing
+        touch dist/.nojekyll
+        echo "Frontend built successfully!"
+        ls -la dist/
         
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
