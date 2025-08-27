@@ -1,0 +1,1210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Birth Order & Cultural Gender Attitudes Research Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f8f9fa; }
+        .dashboard-container { max-width: 1400px; margin: 0 auto; background: white; min-height: 100vh; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
+        .dashboard-header { background: linear-gradient(135deg, #1f77b4 0%, #2ca02c 100%); color: white; padding: 2rem; text-align: center; }
+        .dashboard-header h1 { font-size: 2.5rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .dashboard-header .subtitle { font-size: 1.1rem; opacity: 0.9; font-weight: 300; }
+        .dashboard-nav { background: white; border-bottom: 1px solid #e9ecef; padding: 0 2rem; }
+        .dashboard-nav ul { list-style: none; display: flex; gap: 0; }
+        .dashboard-nav li { flex: 1; }
+        .dashboard-nav a { display: block; padding: 1rem 1.5rem; text-decoration: none; color: #666; text-align: center; border-bottom: 3px solid transparent; transition: all 0.3s ease; font-weight: 500; }
+        .dashboard-nav a:hover { color: #1f77b4; background-color: #f8f9fa; }
+        .dashboard-nav a.active { color: #1f77b4; border-bottom-color: #1f77b4; background-color: #f8f9fa; }
+        .dashboard-main { padding: 2rem; }
+        .view-content { display: none; animation: fadeIn 0.3s ease-in; }
+        .view-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .summary-stats { margin-bottom: 3rem; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; }
+        .stat-card { background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center; }
+        .stat-value { font-size: 2rem; font-weight: bold; color: #1f77b4; margin: 0.5rem 0; }
+        .stat-label { color: #666; font-size: 0.9rem; }
+        .chart-section { margin-bottom: 3rem; }
+        .chart-container { border: 1px solid #e9ecef; border-radius: 8px; padding: 1rem; background: white; min-height: 400px; }
+        .chart-controls { margin-bottom: 1rem; }
+        .export-chart { background: #1f77b4; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; }
+        .export-chart:hover { background: #155a8a; }
+        .chart-description { margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 4px; color: #666; }
+        .tooltip { position: absolute; background: rgba(0,0,0,0.8); color: white; padding: 8px; border-radius: 4px; font-size: 12px; pointer-events: none; opacity: 0; z-index: 1000; }
+        
+        /* Legend Styles */
+        .legend { pointer-events: all; }
+        .legend-item { cursor: pointer; transition: all 0.2s ease; }
+        .legend-item:hover { transform: translateX(2px); }
+        .legend-item text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        
+        /* Contribute Data Styles */
+        .contribute-section { max-width: 800px; margin: 0 auto; }
+        .contribute-description { text-align: center; margin-bottom: 2rem; color: #666; line-height: 1.6; }
+        .data-form { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; color: #333; }
+        .form-group input, .form-group select, .form-group textarea { 
+            width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem; 
+            transition: border-color 0.3s ease; 
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { 
+            outline: none; border-color: #1f77b4; box-shadow: 0 0 0 2px rgba(31,119,180,0.2); 
+        }
+        .form-group small { display: block; margin-top: 0.25rem; color: #666; font-size: 0.875rem; }
+        .submit-btn { 
+            background: linear-gradient(135deg, #1f77b4 0%, #2ca02c 100%); color: white; border: none; 
+            padding: 1rem 2rem; border-radius: 4px; cursor: pointer; font-size: 1.1rem; font-weight: 500; 
+            transition: transform 0.2s ease; 
+        }
+        .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .submission-status { 
+            margin-top: 1rem; padding: 1rem; border-radius: 4px; text-align: center; font-weight: 500; 
+        }
+        .submission-status.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .submission-status.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <header class="dashboard-header">
+            <h1>Birth Order & Cultural Gender Attitudes Research</h1>
+            <p class="subtitle">Educational Attainment Patterns in Immigrant Families</p>
+        </header>
+
+        <nav class="dashboard-nav">
+            <ul>
+                <li><a href="#overview" class="nav-link active" data-view="overview">Overview</a></li>
+                <li><a href="#attitudes" class="nav-link" data-view="attitudes">Regional Attitudes</a></li>
+                <li><a href="#family-size" class="nav-link" data-view="family-size">Family Size Analysis</a></li>
+                <li><a href="#distribution" class="nav-link" data-view="distribution">Education Distribution</a></li>
+                <li><a href="#heterogeneity" class="nav-link" data-view="heterogeneity">Effect Heterogeneity</a></li>
+                <li><a href="#contribute" class="nav-link" data-view="contribute">Contribute Data</a></li>
+            </ul>
+        </nav>
+
+        <main class="dashboard-main">
+            <!-- Overview View -->
+            <div id="overview-view" class="view-content active">
+                <section class="summary-stats">
+                    <h2>Study Overview</h2>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <h3>Sample Size</h3>
+                            <div class="stat-value" id="total-families">706</div>
+                            <div class="stat-label">Total Families</div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Individuals</h3>
+                            <div class="stat-value" id="total-individuals">1,098</div>
+                            <div class="stat-label">Children (18-35)</div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Family Size</h3>
+                            <div class="stat-value" id="avg-family-size">2.87</div>
+                            <div class="stat-label">Average Children</div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Firstborns</h3>
+                            <div class="stat-value" id="firstborn-percentage">31%</div>
+                            <div class="stat-label">of Sample</div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="key-findings">
+                    <h2>Key Findings</h2>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <h3>Male Firstborn Premium</h3>
+                            <div class="stat-value" id="male-premium">+1.46 years</div>
+                            <p>Consistent across all cultural backgrounds</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Female Firstborn Premium</h3>
+                            <div class="stat-value" id="female-progressive">+1.75 years</div>
+                            <p>In progressive families (attitude score: 0.10)</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Female Firstborn Premium</h3>
+                            <div class="stat-value" id="female-traditional">+1.15 years</div>
+                            <p>In traditional families (attitude score: 0.69)</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Effect Size</h3>
+                            <div class="stat-value" id="sd-impact">0.64 SD</div>
+                            <p>Large practical significance</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Attitudes View -->
+            <div id="attitudes-view" class="view-content">
+                <section class="chart-section">
+                    <h2>Regional Gender Attitudes by Immigrant Origin</h2>
+                    <div class="chart-controls">
+                        <button class="export-chart" onclick="exportChart('attitudes-chart')">Export Chart</button>
+                    </div>
+                    <div id="attitudes-chart" class="chart-container"></div>
+                    <div class="chart-description">
+                        <p>This visualization shows gender attitude scores across different regions of immigrant origin. Higher scores indicate more traditional gender attitudes.</p>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Family Size View -->
+            <div id="family-size-view" class="view-content">
+                <section class="chart-section">
+                    <h2>Family Size Analysis: Testing for Selection Bias</h2>
+                    <div class="chart-controls">
+                        <button class="export-chart" onclick="exportChart('family-size-chart')">Export Chart</button>
+                    </div>
+                    <div id="family-size-chart" class="chart-container"></div>
+                    <div class="chart-description">
+                        <p>This analysis tests whether families with different firstborn genders have systematically different family sizes, which could indicate selection bias.</p>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Distribution View -->
+            <div id="distribution-view" class="view-content">
+                <section class="chart-section">
+                    <h2>Educational Attainment Distribution by Birth Order and Gender</h2>
+                    <div class="chart-controls">
+                        <button class="export-chart" onclick="exportChart('distribution-chart')">Export Chart</button>
+                    </div>
+                    <div id="distribution-chart" class="chart-container"></div>
+                    <div class="chart-description">
+                        <p>Density plots showing the distribution of educational attainment for each group. Firstborn children show higher educational attainment across all groups.</p>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Heterogeneity View -->
+            <div id="heterogeneity-view" class="view-content">
+                <section class="chart-section">
+                    <h2>Effect Heterogeneity: Firstborn Premium by Gender and Cultural Attitudes</h2>
+                    <div class="chart-controls">
+                        <button class="export-chart" onclick="exportChart('heterogeneity-chart')">Export Chart</button>
+                    </div>
+                    <div id="heterogeneity-chart" class="chart-container"></div>
+                    <div class="chart-description">
+                        <p>This key finding shows how the female firstborn premium varies with cultural gender attitudes. While male firstborn effects remain constant, female firstborn effects decline in more traditional families.</p>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Contribute Data View -->
+            <div id="contribute-view" class="view-content">
+                <section class="contribute-section">
+                    <h2>Contribute Your Research Data</h2>
+                    <p class="contribute-description">
+                        Help expand our understanding of birth order effects across different cultural contexts. 
+                        Submit your family data to contribute to this ongoing research.
+                    </p>
+                    
+                    <form id="data-form" class="data-form">
+                        <div class="form-group">
+                            <label for="region">Region of Origin:</label>
+                            <select id="region" name="region" required>
+                                <option value="">Select a region</option>
+                                <option value="Canadian">Canadian</option>
+                                <option value="Pacific Islander">Pacific Islander</option>
+                                <option value="Western European">Western European</option>
+                                <option value="British">British</option>
+                                <option value="Central American">Central American</option>
+                                <option value="South American">South American</option>
+                                <option value="Caribbean">Caribbean</option>
+                                <option value="Eastern European">Eastern European</option>
+                                <option value="Northern European">Northern European</option>
+                                <option value="East Asian">East Asian</option>
+                                <option value="African">African</option>
+                                <option value="South Asian">South Asian</option>
+                                <option value="Middle Eastern">Middle Eastern</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="family-size">Number of Children in Family:</label>
+                            <input type="number" id="family-size" name="family-size" min="1" max="10" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="firstborn-gender">Firstborn Gender:</label>
+                            <select id="firstborn-gender" name="firstborn-gender" required>
+                                <option value="">Select gender</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="attitude-score">Cultural Gender Attitude Score (0.1-0.7):</label>
+                            <input type="number" id="attitude-score" name="attitude-score" min="0.1" max="0.7" step="0.01" required>
+                            <small>0.1 = Progressive, 0.7 = Traditional</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="firstborn-education">Firstborn Education (Years):</label>
+                            <input type="number" id="firstborn-education" name="firstborn-education" min="1" max="20" step="0.1" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="laterborn-education">Later-born Education (Years):</label>
+                            <input type="number" id="laterborn-education" name="laterborn-education" min="1" max="20" step="0.1" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="age-range">Age Range of Children:</label>
+                            <select id="age-range" name="age-range" required>
+                                <option value="">Select age range</option>
+                                <option value="18-25">18-25 years</option>
+                                <option value="26-30">26-30 years</option>
+                                <option value="31-35">31-35 years</option>
+                                <option value="35+">35+ years</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="notes">Additional Notes:</label>
+                            <textarea id="notes" name="notes" rows="3" placeholder="Any additional context about your family or cultural background..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="contact-email">Contact Email (Optional):</label>
+                            <input type="email" id="contact-email" name="contact-email" placeholder="For follow-up questions">
+                        </div>
+
+                        <button type="submit" class="submit-btn">Submit Data</button>
+                    </form>
+
+                    <div id="submission-status" class="submission-status" style="display: none;"></div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Load D3.js -->
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+    
+    <script>
+        // Data definitions
+        const regionalAttitudes = [
+            { region: 'Canadian', attitude: 0.100, sampleSize: 54, color: '#2E8B57', level: 'Progressive' },
+            { region: 'Pacific Islander', attitude: 0.108, sampleSize: 42, color: '#3CB371', level: 'Progressive' },
+            { region: 'Western European', attitude: 0.140, sampleSize: 68, color: '#20B2AA', level: 'Progressive' },
+            { region: 'British', attitude: 0.158, sampleSize: 71, color: '#4682B4', level: 'Moderate' },
+            { region: 'Central American', attitude: 0.225, sampleSize: 95, color: '#6A5ACD', level: 'Moderate' },
+            { region: 'South American', attitude: 0.235, sampleSize: 89, color: '#9370DB', level: 'Moderate' },
+            { region: 'Caribbean', attitude: 0.253, sampleSize: 76, color: '#BA55D3', level: 'Moderate' },
+            { region: 'Eastern European', attitude: 0.281, sampleSize: 63, color: '#FF8C00', level: 'Traditional' },
+            { region: 'Northern European', attitude: 0.281, sampleSize: 63, color: '#FF6347', level: 'Traditional' },
+            { region: 'East Asian', attitude: 0.340, sampleSize: 104, color: '#FF4500', level: 'Traditional' },
+            { region: 'African', attitude: 0.378, sampleSize: 87, color: '#DC143C', level: 'Traditional' },
+            { region: 'South Asian', attitude: 0.505, sampleSize: 118, color: '#8B0000', level: 'Very Traditional' },
+            { region: 'Middle Eastern', attitude: 0.694, sampleSize: 52, color: '#800000', level: 'Very Traditional' }
+        ];
+
+        const familySizeData = [
+            { category: 'Female Firstborn', avgSize: 2.80, stderr: 0.12, ci_lower: 2.56, ci_upper: 3.04, n: 340, color: '#d62728' },
+            { category: 'Male Firstborn', avgSize: 2.94, stderr: 0.11, ci_lower: 2.72, ci_upper: 3.16, n: 366, color: '#1f77b4' }
+        ];
+
+        const educationDistribution = {
+            firstbornMale: { mean: 14.12, stdDev: 2.18, sampleSize: 170, color: '#1f77b4' },
+            laterbornMale: { mean: 12.65, stdDev: 2.35, sampleSize: 369, color: '#17becf' },
+            firstbornFemale: { mean: 14.40, stdDev: 2.08, sampleSize: 171, color: '#d62728' },
+            laterbornFemale: { mean: 12.74, stdDev: 2.42, sampleSize: 388, color: '#e377c2' }
+        };
+
+        const heterogeneityData = [
+            { attitude: 0.10, maleEffect: 1.47, femaleEffect: 2.07, ciLower: 1.65, ciUpper: 2.49 },
+            { attitude: 0.15, maleEffect: 1.47, femaleEffect: 1.99, ciLower: 1.59, ciUpper: 2.39 },
+            { attitude: 0.20, maleEffect: 1.47, femaleEffect: 1.91, ciLower: 1.53, ciUpper: 2.29 },
+            { attitude: 0.25, maleEffect: 1.47, femaleEffect: 1.84, ciLower: 1.47, ciUpper: 2.21 },
+            { attitude: 0.30, maleEffect: 1.47, femaleEffect: 1.76, ciLower: 1.41, ciUpper: 2.11 },
+            { attitude: 0.35, maleEffect: 1.47, femaleEffect: 1.68, ciLower: 1.35, ciUpper: 2.01 },
+            { attitude: 0.40, maleEffect: 1.47, femaleEffect: 1.60, ciLower: 1.29, ciUpper: 1.91 },
+            { attitude: 0.45, maleEffect: 1.47, femaleEffect: 1.52, ciLower: 1.23, ciUpper: 1.81 },
+            { attitude: 0.50, maleEffect: 1.47, femaleEffect: 1.44, ciLower: 1.17, ciUpper: 1.71 },
+            { attitude: 0.55, maleEffect: 1.47, femaleEffect: 1.37, ciLower: 1.11, ciUpper: 1.63 },
+            { attitude: 0.60, maleEffect: 1.47, femaleEffect: 1.29, ciLower: 1.05, ciUpper: 1.53 },
+            { attitude: 0.65, maleEffect: 1.47, femaleEffect: 1.21, ciLower: 0.99, ciUpper: 1.43 },
+            { attitude: 0.69, maleEffect: 1.47, femaleEffect: 1.15, ciLower: 0.95, ciUpper: 1.35 }
+        ];
+
+        // Utility functions
+        function formatNumber(num, decimals = 2) {
+            return Number(num).toFixed(decimals);
+        }
+
+        function createTooltip() {
+            return d3.select('body').append('div')
+                .attr('class', 'tooltip')
+                .style('opacity', 0);
+        }
+
+        function showTooltip(tooltip, content, event) {
+            tooltip.html(content)
+                .style('opacity', 1)
+                .style('left', (event.pageX + 10) + 'px')
+                .style('top', (event.pageY - 10) + 'px');
+        }
+
+        function hideTooltip(tooltip) {
+            tooltip.style('opacity', 0);
+        }
+
+        // Chart functions
+        function renderAttitudesChart() {
+            const container = document.getElementById('attitudes-chart');
+            if (!container) return;
+
+            const width = 900;
+            const height = 500;
+            const margin = { top: 40, right: 220, bottom: 80, left: 80 };
+
+            // Clear container
+            container.innerHTML = '';
+
+            const svg = d3.select(container)
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height);
+
+            const chartGroup = svg.append('g')
+                .attr('transform', `translate(${margin.left}, ${margin.top})`);
+
+            const chartWidth = width - margin.left - margin.right;
+            const chartHeight = height - margin.top - margin.bottom;
+
+            // Create scales
+            const xScale = d3.scaleBand()
+                .domain(regionalAttitudes.map(d => d.region))
+                .range([0, chartWidth])
+                .padding(0.1);
+
+            const yScale = d3.scaleLinear()
+                .domain([0, d3.max(regionalAttitudes, d => d.attitude) * 1.1])
+                .range([chartHeight, 0]);
+
+            // Create tooltip
+            const tooltip = createTooltip();
+
+            // Create bars
+            chartGroup.selectAll('.bar')
+                .data(regionalAttitudes)
+                .enter()
+                .append('rect')
+                .attr('class', 'bar')
+                .attr('x', d => xScale(d.region))
+                .attr('y', d => yScale(d.attitude))
+                .attr('width', xScale.bandwidth())
+                .attr('height', d => chartHeight - yScale(d.attitude))
+                .attr('fill', d => d.color)
+                .attr('stroke', '#fff')
+                .attr('stroke-width', 1)
+                .style('opacity', 0.8)
+                .on('mouseover', function(event, d) {
+                    const content = `
+                        <strong>${d.region}</strong><br/>
+                        Attitude Score: ${formatNumber(d.attitude, 3)}<br/>
+                        Sample Size: ${d.sampleSize} families<br/>
+                        Level: ${d.level}<br/>
+                        ${d.attitude > 0.5 ? 'Traditional' : d.attitude > 0.25 ? 'Moderate' : 'Progressive'} attitudes
+                    `;
+                    showTooltip(tooltip, content, event);
+                    
+                    d3.select(this)
+                        .style('opacity', 1)
+                        .attr('stroke-width', 2);
+                })
+                .on('mouseout', function(event) {
+                    hideTooltip(tooltip);
+                    d3.select(this)
+                        .style('opacity', 0.8)
+                        .attr('stroke-width', 1);
+                });
+
+            // Create axes
+            const xAxis = d3.axisBottom(xScale);
+            const yAxis = d3.axisLeft(yScale);
+
+            chartGroup.append('g')
+                .attr('transform', `translate(0, ${chartHeight})`)
+                .call(xAxis)
+                .selectAll('text')
+                .attr('transform', 'rotate(-45)')
+                .style('text-anchor', 'end')
+                .attr('dx', '-0.5em')
+                .attr('dy', '0.5em')
+                .style('font-size', '10px');
+
+            chartGroup.append('g').call(yAxis);
+
+            // Add legend
+            const legendData = [
+                { level: 'Progressive', color: '#2E8B57', range: '0.10 - 0.20' },
+                { level: 'Moderate', color: '#4682B4', range: '0.20 - 0.30' },
+                { level: 'Traditional', color: '#FF6347', range: '0.30 - 0.50' },
+                { level: 'Very Traditional', color: '#8B0000', range: '0.50+' }
+            ];
+
+            const legend = svg.append('g')
+                .attr('class', 'legend')
+                .attr('transform', `translate(${width - 180}, ${margin.top})`);
+
+            // Add legend background for better readability
+            legend.append('rect')
+                .attr('x', -10)
+                .attr('y', -10)
+                .attr('width', 170)
+                .attr('height', 110)
+                .attr('fill', 'rgba(255, 255, 255, 0.98)')
+                .attr('stroke', '#e9ecef')
+                .attr('stroke-width', 1)
+                .attr('rx', 6)
+                .style('filter', 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))');
+
+            legend.selectAll('.legend-item')
+                .data(legendData)
+                .enter()
+                .append('g')
+                .attr('class', 'legend-item')
+                .attr('transform', (d, i) => `translate(0, ${i * 25})`)
+                .on('mouseover', function(event, d) {
+                    d3.select(this).select('text').style('font-weight', 'bold');
+                    d3.select(this).select('rect').style('opacity', 0.8);
+                })
+                .on('mouseout', function(event, d) {
+                    d3.select(this).select('text').style('font-weight', 'normal');
+                    d3.select(this).select('rect').style('opacity', 1);
+                });
+
+            legend.selectAll('.legend-item')
+                .append('rect')
+                .attr('x', 0)
+                .attr('y', 0)
+                .attr('width', 15)
+                .attr('height', 15)
+                .attr('fill', d => d.color)
+                .attr('stroke', '#333')
+                .attr('stroke-width', 1)
+                .attr('rx', 2);
+
+            legend.selectAll('.legend-item')
+                .append('text')
+                .attr('x', 20)
+                .attr('y', 12)
+                .style('font-size', '11px')
+                .style('font-weight', '500')
+                .style('fill', '#333')
+                .style('dominant-baseline', 'middle')
+                .text(d => `${d.level} (${d.range})`);
+
+            // Add title
+            svg.append('text')
+                .attr('x', width / 2)
+                .attr('y', 25)
+                .attr('text-anchor', 'middle')
+                .style('font-size', '16px')
+                .style('font-weight', 'bold')
+                .text('Regional Gender Attitudes by Immigrant Origin');
+
+            // Add axis labels
+            svg.append('text')
+                .attr('x', width / 2)
+                .attr('y', height - 10)
+                .attr('text-anchor', 'middle')
+                .style('font-size', '12px')
+                .text('Region of Origin');
+
+            svg.append('text')
+                .attr('transform', 'rotate(-90)')
+                .attr('x', -height / 2)
+                .attr('y', 20)
+                .attr('text-anchor', 'middle')
+                .style('font-size', '12px')
+                .text('Gender Attitude Score (Higher = More Traditional)');
+        }
+
+        function renderFamilySizeChart() {
+            const container = document.getElementById('family-size-chart');
+            if (!container) return;
+
+            const width = 900;
+            const height = 500;
+            const margin = { top: 40, right: 220, bottom: 80, left: 80 };
+
+            // Clear container
+            container.innerHTML = '';
+
+            const svg = d3.select(container)
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height);
+
+            const chartGroup = svg.append('g')
+                .attr('transform', `translate(${margin.left}, ${margin.top})`);
+
+            const chartWidth = width - margin.left - margin.right;
+            const chartHeight = height - margin.top - margin.bottom;
+
+            // Create scales
+            const xScale = d3.scaleBand()
+                .domain(familySizeData.map(d => d.category))
+                .range([0, chartWidth])
+                .padding(0.3);
+
+            const yScale = d3.scaleLinear()
+                .domain([0, d3.max(familySizeData, d => d.ci_upper) * 1.1])
+                .range([chartHeight, 0]);
+
+            // Create tooltip
+            const tooltip = createTooltip();
+
+            // Create bars
+            chartGroup.selectAll('.bar')
+                .data(familySizeData)
+                .enter()
+                .append('rect')
+                .attr('class', 'bar')
+                .attr('x', d => xScale(d.category))
+                .attr('y', d => yScale(d.avgSize))
+                .attr('width', xScale.bandwidth())
+                .attr('height', d => chartHeight - yScale(d.avgSize))
+                .attr('fill', d => d.color)
+                .attr('stroke', '#fff')
+                .attr('stroke-width', 1)
+                .style('opacity', 0.8)
+                .on('mouseover', function(event, d) {
+                    const content = `
+                        <strong>${d.category}</strong><br/>
+                        Average Family Size: ${formatNumber(d.avgSize, 2)}<br/>
+                        95% CI: ${formatNumber(d.ci_lower, 2)} - ${formatNumber(d.ci_upper, 2)}<br/>
+                        Sample Size: ${d.n} families
+                    `;
+                    showTooltip(tooltip, content, event);
+                    
+                    d3.select(this)
+                        .style('opacity', 1)
+                        .attr('stroke-width', 2);
+                })
+                .on('mouseout', function(event) {
+                    hideTooltip(tooltip);
+                    d3.select(this)
+                        .style('opacity', 0.8)
+                        .attr('stroke-width', 1);
+                });
+
+            // Add error bars
+            chartGroup.selectAll('.error-bar')
+                .data(familySizeData)
+                .enter()
+                .append('line')
+                .attr('class', 'error-bar')
+                .attr('x1', d => xScale(d.category) + xScale.bandwidth() / 2)
+                .attr('x2', d => xScale(d.category) + xScale.bandwidth() / 2)
+                .attr('y1', d => yScale(d.ci_lower))
+                .attr('y2', d => yScale(d.ci_upper))
+                .attr('stroke', '#333')
+                .attr('stroke-width', 2);
+
+            // Create axes
+            const xAxis = d3.axisBottom(xScale);
+            const yAxis = d3.axisLeft(yScale);
+
+            chartGroup.append('g')
+                .attr('transform', `translate(0, ${chartHeight})`)
+                .call(xAxis);
+
+            chartGroup.append('g').call(yAxis);
+
+            // Add legend
+            const legend = svg.append('g')
+                .attr('class', 'legend')
+                .attr('transform', `translate(${width - 150}, ${margin.top})`);
+
+            legend.selectAll('.legend-item')
+                .data(familySizeData)
+                .enter()
+                .append('g')
+                .attr('class', 'legend-item')
+                .attr('transform', (d, i) => `translate(0, ${i * 25})`)
+                .on('mouseover', function(event, d) {
+                    d3.select(this).select('text').style('font-weight', 'bold');
+                })
+                .on('mouseout', function(event, d) {
+                    d3.select(this).select('text').style('font-weight', 'normal');
+                });
+
+            legend.selectAll('.legend-item')
+                .append('rect')
+                .attr('width', 15)
+                .attr('height', 15)
+                .attr('fill', d => d.color)
+                .attr('stroke', '#333')
+                .attr('stroke-width', 1);
+
+            legend.selectAll('.legend-item')
+                .append('text')
+                .attr('x', 20)
+                .attr('y', 12)
+                .style('font-size', '11px')
+                .text(d => `${d.category} (n=${d.n})`);
+
+            // Add title
+            svg.append('text')
+                .attr('x', width / 2)
+                .attr('y', margin.top - 10)
+                .attr('text-anchor', 'middle')
+                .style('font-size', '16px')
+                .style('font-weight', 'bold')
+                .text('Family Size by Firstborn Gender');
+        }
+
+        function renderDistributionChart() {
+            const container = document.getElementById('distribution-chart');
+            if (!container) return;
+
+            const width = 900;
+            const height = 500;
+            const margin = { top: 40, right: 220, bottom: 80, left: 80 };
+
+            // Clear container
+            container.innerHTML = '';
+
+            const svg = d3.select(container)
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height);
+
+            const chartGroup = svg.append('g')
+                .attr('transform', `translate(${margin.left}, ${margin.top})`);
+
+            const chartWidth = width - margin.left - margin.right;
+            const chartHeight = height - margin.top - margin.bottom;
+
+            // Generate density data
+            function generateDensity(mean, stdDev) {
+                const points = [];
+                for (let year = 1; year <= 17; year += 0.1) {
+                    const density = (1 / (stdDev * Math.sqrt(2 * Math.PI))) * 
+                                  Math.exp(-0.5 * Math.pow((year - mean) / stdDev, 2));
+                    points.push({ year, density });
+                }
+                return points;
+            }
+
+            const groups = [
+                { key: 'firstbornMale', data: generateDensity(educationDistribution.firstbornMale.mean, educationDistribution.firstbornMale.stdDev), color: '#1f77b4', label: 'Firstborn Males' },
+                { key: 'laterbornMale', data: generateDensity(educationDistribution.laterbornMale.mean, educationDistribution.laterbornMale.stdDev), color: '#17becf', label: 'Later-born Males' },
+                { key: 'firstbornFemale', data: generateDensity(educationDistribution.firstbornFemale.mean, educationDistribution.firstbornFemale.stdDev), color: '#d62728', label: 'Firstborn Females' },
+                { key: 'laterbornFemale', data: generateDensity(educationDistribution.laterbornFemale.mean, educationDistribution.laterbornFemale.stdDev), color: '#e377c2', label: 'Later-born Females' }
+            ];
+
+            // Create scales
+            const xScale = d3.scaleLinear()
+                .domain([1, 17])
+                .range([0, chartWidth]);
+
+            const maxDensity = d3.max(groups, group => d3.max(group.data, d => d.density));
+            const yScale = d3.scaleLinear()
+                .domain([0, maxDensity * 1.1])
+                .range([chartHeight, 0]);
+
+            // Create tooltip
+            const tooltip = createTooltip();
+
+            // Create line generator
+            const line = d3.line()
+                .x(d => xScale(d.year))
+                .y(d => yScale(d.density))
+                .curve(d3.curveMonotoneX);
+
+            // Plot each group
+            groups.forEach(group => {
+                chartGroup.append('path')
+                    .datum(group.data)
+                    .attr('class', `line ${group.key}`)
+                    .attr('d', line)
+                    .attr('fill', 'none')
+                    .attr('stroke', group.color)
+                    .attr('stroke-width', 2)
+                    .style('opacity', 0.8)
+                    .on('mouseover', function(event) {
+                        d3.select(this)
+                            .style('opacity', 1)
+                            .attr('stroke-width', 3);
+                        
+                        const mean = educationDistribution[group.key].mean;
+                        const stdDev = educationDistribution[group.key].stdDev;
+                        const sampleSize = educationDistribution[group.key].sampleSize;
+                        
+                        const content = `
+                            <strong>${group.label}</strong><br/>
+                            Mean: ${formatNumber(mean, 2)} years<br/>
+                            Std Dev: ${formatNumber(stdDev, 2)}<br/>
+                            Sample Size: ${sampleSize} individuals
+                        `;
+                        showTooltip(tooltip, content, event);
+                    })
+                    .on('mouseout', function(event) {
+                        d3.select(this)
+                            .style('opacity', 0.8)
+                            .attr('stroke-width', 2);
+                        hideTooltip(tooltip);
+                    });
+            });
+
+            // Create axes
+            const xAxis = d3.axisBottom(xScale);
+            const yAxis = d3.axisLeft(yScale);
+
+            chartGroup.append('g')
+                .attr('transform', `translate(0, ${chartHeight})`)
+                .call(xAxis);
+
+            chartGroup.append('g').call(yAxis);
+
+            // Add legend
+            const legend = svg.append('g')
+                .attr('class', 'legend')
+                .attr('transform', `translate(${width - 180}, ${margin.top})`);
+
+            // Add legend background for better readability
+            legend.append('rect')
+                .attr('x', -10)
+                .attr('y', -10)
+                .attr('width', 170)
+                .attr('height', 110)
+                .attr('fill', 'rgba(255, 255, 255, 0.95)')
+                .attr('stroke', '#e9ecef')
+                .attr('stroke-width', 1)
+                .attr('rx', 4);
+
+            legend.selectAll('.legend-item')
+                .data(groups)
+                .enter()
+                .append('g')
+                .attr('class', 'legend-item')
+                .attr('transform', (d, i) => `translate(0, ${i * 25})`)
+                .on('mouseover', function(event, d) {
+                    d3.select(this).select('text').style('font-weight', 'bold');
+                    d3.select(this).select('line').style('stroke-width', 3);
+                })
+                .on('mouseout', function(event, d) {
+                    d3.select(this).select('text').style('font-weight', 'normal');
+                    d3.select(this).select('line').style('stroke-width', 2);
+                });
+
+            legend.selectAll('.legend-item')
+                .append('line')
+                .attr('x1', 0)
+                .attr('x2', 20)
+                .attr('y1', 8)
+                .attr('y2', 8)
+                .attr('stroke', d => d.color)
+                .attr('stroke-width', 2);
+
+            legend.selectAll('.legend-item')
+                .append('text')
+                .attr('x', 25)
+                .attr('y', 12)
+                .style('font-size', '11px')
+                .text(d => `${d.label} (μ=${formatNumber(educationDistribution[d.key].mean, 2)})`);
+
+            // Add title
+            svg.append('text')
+                .attr('x', width / 2)
+                .attr('y', margin.top - 10)
+                .attr('text-anchor', 'middle')
+                .style('font-size', '16px')
+                .style('font-weight', 'bold')
+                .text('Educational Attainment Distribution by Birth Order and Gender');
+        }
+
+        function renderHeterogeneityChart() {
+            const container = document.getElementById('heterogeneity-chart');
+            if (!container) return;
+
+            const width = 900;
+            const height = 500;
+            const margin = { top: 40, right: 220, bottom: 80, left: 80 };
+
+            // Clear container
+            container.innerHTML = '';
+
+            const svg = d3.select(container)
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height);
+
+            const chartGroup = svg.append('g')
+                .attr('transform', `translate(${margin.left}, ${margin.top})`);
+
+            const chartWidth = width - margin.left - margin.right;
+            const chartHeight = height - margin.top - margin.bottom;
+
+            // Create scales
+            const xScale = d3.scaleLinear()
+                .domain([0.10, 0.69])
+                .range([0, chartWidth]);
+
+            const yScale = d3.scaleLinear()
+                .domain([0, d3.max(heterogeneityData, d => d.ciUpper) * 1.1])
+                .range([chartHeight, 0]);
+
+            // Create tooltip
+            const tooltip = createTooltip();
+
+            // Create line generator
+            const line = d3.line()
+                .x(d => xScale(d.attitude))
+                .y(d => yScale(d.effect))
+                .curve(d3.curveMonotoneX);
+
+            // Add confidence intervals for female effect (background)
+            const confidenceArea = d3.area()
+                .x(d => xScale(d.attitude))
+                .y0(d => yScale(d.ciLower))
+                .y1(d => yScale(d.ciUpper))
+                .curve(d3.curveMonotoneX);
+
+            chartGroup.append('path')
+                .datum(heterogeneityData)
+                .attr('class', 'confidence-area')
+                .attr('d', confidenceArea)
+                .attr('fill', '#e74c3c')
+                .style('opacity', 0.1);
+
+            // Plot male effect line (constant)
+            const maleData = heterogeneityData.map(d => ({ attitude: d.attitude, effect: d.maleEffect }));
+            chartGroup.append('path')
+                .datum(maleData)
+                .attr('class', 'line male-effect')
+                .attr('d', line)
+                .attr('fill', 'none')
+                .attr('stroke', '#1f77b4')
+                .attr('stroke-width', 3)
+                .style('opacity', 0.8)
+                .on('mouseover', function(event) {
+                    d3.select(this)
+                        .style('opacity', 1)
+                        .attr('stroke-width', 4);
+                    
+                    const content = `
+                        <strong>Male Firstborn Effect</strong><br/>
+                        Constant across all cultural attitudes<br/>
+                        Effect: ${formatNumber(maleData[0].effect, 2)} years<br/>
+                        <em>Hover over points for detailed female effects</em>
+                    `;
+                    showTooltip(tooltip, content, event);
+                })
+                .on('mouseout', function(event) {
+                    d3.select(this)
+                        .style('opacity', 0.8)
+                        .attr('stroke-width', 3);
+                    hideTooltip(tooltip);
+                });
+
+            // Plot female effect line (declining)
+            const femaleData = heterogeneityData.map(d => ({ attitude: d.attitude, effect: d.femaleEffect }));
+            chartGroup.append('path')
+                .datum(femaleData)
+                .attr('class', 'line female-effect')
+                .attr('d', line)
+                .attr('fill', 'none')
+                .attr('stroke', '#e74c3c')
+                .attr('stroke-width', 3)
+                .style('opacity', 0.8)
+                .on('mouseover', function(event) {
+                    d3.select(this)
+                        .style('opacity', 1)
+                        .attr('stroke-width', 4);
+                    
+                    const content = `
+                        <strong>Female Firstborn Effect</strong><br/>
+                        Declines with traditional attitudes<br/>
+                        <em>Hover over points for detailed values</em>
+                    `;
+                    showTooltip(tooltip, content, event);
+                })
+                .on('mouseout', function(event) {
+                    d3.select(this)
+                        .style('opacity', 0.8)
+                        .attr('stroke-width', 3);
+                    hideTooltip(tooltip);
+                });
+
+            // Add data points for female effect with enhanced interaction
+            chartGroup.selectAll('.female-point')
+                .data(heterogeneityData)
+                .enter()
+                .append('circle')
+                .attr('class', 'female-point')
+                .attr('cx', d => xScale(d.attitude))
+                .attr('cy', d => yScale(d.femaleEffect))
+                .attr('r', 4)
+                .attr('fill', '#e74c3c')
+                .attr('stroke', '#fff')
+                .attr('stroke-width', 2)
+                .style('cursor', 'pointer')
+                .on('mouseover', function(event, d) {
+                    const content = `
+                        <strong>Cultural Attitude: ${formatNumber(d.attitude, 2)}</strong><br/>
+                        <span style="color: #e74c3c;">Female Firstborn Effect: ${formatNumber(d.femaleEffect, 2)} years</span><br/>
+                        95% CI: ${formatNumber(d.ciLower, 2)} - ${formatNumber(d.ciUpper, 2)}<br/>
+                        <span style="color: #1f77b4;">Male Effect: ${formatNumber(d.maleEffect, 2)} years</span><br/>
+                        <em>Difference: ${formatNumber(d.femaleEffect - d.maleEffect, 2)} years</em>
+                    `;
+                    showTooltip(tooltip, content, event);
+                    
+                    d3.select(this)
+                        .attr('r', 6)
+                        .attr('stroke-width', 3)
+                        .attr('fill', '#ff6b6b');
+                    
+                    // Highlight corresponding confidence interval
+                    d3.select('.confidence-area').style('opacity', 0.2);
+                })
+                .on('mouseout', function(event) {
+                    hideTooltip(tooltip);
+                    d3.select(this)
+                        .attr('r', 4)
+                        .attr('stroke-width', 2)
+                        .attr('fill', '#e74c3c');
+                    
+                    // Reset confidence interval opacity
+                    d3.select('.confidence-area').style('opacity', 0.1);
+                });
+
+            // Add reference lines for key attitude levels
+            const referenceLines = [
+                { attitude: 0.25, label: 'Moderate', color: '#ffa500' },
+                { attitude: 0.50, label: 'Traditional', color: '#ff6347' }
+            ];
+
+            referenceLines.forEach(ref => {
+                const xPos = xScale(ref.attitude);
+                
+                // Vertical reference line
+                chartGroup.append('line')
+                    .attr('x1', xPos)
+                    .attr('x2', xPos)
+                    .attr('y1', 0)
+                    .attr('y2', chartHeight)
+                    .attr('stroke', ref.color)
+                    .attr('stroke-width', 1)
+                    .attr('stroke-dasharray', '5,5')
+                    .style('opacity', 0.6);
+
+                // Reference line label
+                chartGroup.append('text')
+                    .attr('x', xPos + 5)
+                    .attr('y', 15)
+                    .attr('text-anchor', 'start')
+                    .style('font-size', '10px')
+                    .style('fill', ref.color)
+                    .style('font-weight', 'bold')
+                    .text(ref.label);
+            });
+
+            // Create axes
+            const xAxis = d3.axisBottom(xScale);
+            const yAxis = d3.axisLeft(yScale);
+
+            chartGroup.append('g')
+                .attr('transform', `translate(0, ${chartHeight})`)
+                .call(xAxis);
+
+            chartGroup.append('g').call(yAxis);
+
+            // Add legend
+            const legend = svg.append('g')
+                .attr('class', 'legend')
+                .attr('transform', `translate(${width - 150}, ${margin.top})`);
+
+            const legendData = [
+                { label: 'Male Firstborn Effect', color: '#1f77b4', type: 'line' },
+                { label: 'Female Firstborn Effect', color: '#e74c3c', type: 'line' },
+                { label: '95% Confidence Interval', color: '#e74c3c', type: 'area' }
+            ];
+
+            legend.selectAll('.legend-item')
+                .data(legendData)
+                .enter()
+                .append('g')
+                .attr('class', 'legend-item')
+                .attr('transform', (d, i) => `translate(0, ${i * 25})`)
+                .on('mouseover', function(event, d) {
+                    d3.select(this).select('text').style('font-weight', 'bold');
+                })
+                .on('mouseout', function(event, d) {
+                    d3.select(this).select('text').style('font-weight', 'normal');
+                });
+
+            legend.selectAll('.legend-item')
+                .append(d => d.type === 'line' ? 'line' : 'rect')
+                .attr(d => d.type === 'line' ? 
+                    { x1: 0, x2: 20, y1: 8, y2: 8 } : 
+                    { x: 0, y: 0, width: 20, height: 16 }
+                )
+                .attr('stroke', d => d.color)
+                .attr('stroke-width', d => d.type === 'line' ? 2 : 1)
+                .attr('fill', d => d.type === 'area' ? d.color : 'none')
+                .style('opacity', d => d.type === 'area' ? 0.1 : 1);
+
+            legend.selectAll('.legend-item')
+                .append('text')
+                .attr('x', 25)
+                .attr('y', 12)
+                .style('font-size', '11px')
+                .text(d => d.label);
+
+            // Add title
+            svg.append('text')
+                .attr('x', width / 2)
+                .attr('y', margin.top - 10)
+                .attr('text-anchor', 'middle')
+                .style('font-size', '16px')
+                .style('font-weight', 'bold')
+                .text('Firstborn Premium by Gender and Cultural Attitudes');
+        }
+
+        // Navigation and chart rendering
+        function switchView(view) {
+            // Update navigation
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            document.querySelector(`[data-view="${view}"]`).classList.add('active');
+
+            // Update content visibility
+            document.querySelectorAll('.view-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`${view}-view`).classList.add('active');
+
+            // Render appropriate chart
+            setTimeout(() => {
+                switch(view) {
+                    case 'attitudes':
+                        renderAttitudesChart();
+                        break;
+                    case 'family-size':
+                        renderFamilySizeChart();
+                        break;
+                    case 'distribution':
+                        renderDistributionChart();
+                        break;
+                    case 'heterogeneity':
+                        renderHeterogeneityChart();
+                        break;
+                }
+            }, 100);
+        }
+
+        function exportChart(chartId) {
+            const svg = document.querySelector(`#${chartId} svg`);
+            if (svg) {
+                const svgData = new XMLSerializer().serializeToString(svg);
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const img = new Image();
+                
+                img.onload = function() {
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    ctx.drawImage(img, 0, 0);
+                    
+                    const link = document.createElement('a');
+                    link.download = `${chartId}-chart.png`;
+                    link.href = canvas.toDataURL();
+                    link.click();
+                };
+                
+                img.src = 'data:image/svg+xml;base64,' + btoa(svgData);
+            }
+        }
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('D3 version:', d3.version);
+            
+            // Setup navigation
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const view = e.target.getAttribute('data-view');
+                    switchView(view);
+                });
+            });
+
+            // Setup data form submission
+            const dataForm = document.getElementById('data-form');
+            if (dataForm) {
+                dataForm.addEventListener('submit', handleDataSubmission);
+            }
+
+            // Show overview by default
+            switchView('overview');
+        });
+
+        // Handle data form submission
+        function handleDataSubmission(event) {
+            event.preventDefault();
+            
+            const formData = new FormData(event.target);
+            const data = Object.fromEntries(formData.entries());
+            
+            // Show loading state
+            const submitBtn = event.target.querySelector('.submit-btn');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Submitting...';
+            submitBtn.disabled = true;
+            
+            // Simulate API call (replace with actual backend endpoint)
+            setTimeout(() => {
+                // For now, we'll just show success message
+                // In production, this would send data to your database
+                showSubmissionStatus('success', 'Thank you! Your data has been submitted successfully. We will review and incorporate it into our research.');
+                
+                // Reset form
+                event.target.reset();
+                
+                // Reset button
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+                
+                // Log data (in production, this would go to your database)
+                console.log('Submitted data:', data);
+                
+                // Here you would typically send the data to your backend:
+                // fetch('/api/submit-data', {
+                //     method: 'POST',
+                //     headers: { 'Content-Type': 'application/json' },
+                //     body: JSON.stringify(data)
+                // });
+                
+            }, 1500);
+        }
+
+        function showSubmissionStatus(type, message) {
+            const statusDiv = document.getElementById('submission-status');
+            statusDiv.textContent = message;
+            statusDiv.className = `submission-status ${type}`;
+            statusDiv.style.display = 'block';
+            
+            // Hide after 5 seconds
+            setTimeout(() => {
+                statusDiv.style.display = 'none';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
